@@ -4,10 +4,12 @@ import { HeroSection } from "@/components/sections/HeroSection";
 import { WhySection } from "@/components/sections/WhySection";
 import { ShowcaseSection } from "@/components/sections/ShowcaseSection";
 import { CollectionSection } from "@/components/sections/CollectionSection";
+import { JourneyTrail } from "@/components/shared/JourneyTrail";
 
 export default function Home() {
   return (
-    <main>
+    <main className="relative">
+      <JourneyTrail />
       <Navigation />
       <HeroSection />
       <WhySection />

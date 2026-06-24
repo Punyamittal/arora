@@ -6,6 +6,32 @@ import { ProductModel3D } from "@/components/shared/ProductModel3D";
 import { CitrusSplash } from "@/components/shared/CitrusSplash";
 import { MintAccent } from "@/components/shared/MintAccent";
 
+const titleContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.14, delayChildren: 0.3 },
+  },
+};
+
+const titleLine = {
+  hidden: { opacity: 0, y: "110%" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.9, ease: smoothEase },
+  },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: smoothEase },
+  },
+};
+
 export function HeroSection() {
   return (
     <section className="relative min-h-screen hero-gradient overflow-hidden">
@@ -30,22 +56,46 @@ export function HeroSection() {
             100% Natural Refreshment
           </motion.span>
 
-          <h1 className="font-heading mt-6 text-[clamp(3.5rem,10vw,6rem)] font-bold leading-[0.95] tracking-tight text-[#1a1a1a]">
-            ARORA
-            <br />
-            <span className="text-gradient-lemon">LEMON</span>
-          </h1>
+          <motion.h1
+            variants={titleContainer}
+            initial="hidden"
+            animate="visible"
+            className="font-heading mt-6 text-[clamp(3.5rem,10vw,6rem)] font-bold leading-[0.95] tracking-tight text-[#1a1a1a]"
+          >
+            <span className="block overflow-hidden">
+              <motion.span variants={titleLine} className="block">
+                ARORA
+              </motion.span>
+            </span>
+            <span className="block overflow-hidden">
+              <motion.span variants={titleLine} className="block text-gradient-lemon">
+                LEMON
+              </motion.span>
+            </span>
+          </motion.h1>
 
-          <p className="font-heading mt-4 text-2xl font-semibold text-[#1a1a1a]/80 md:text-3xl">
+          <motion.p
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.75, duration: 0.8, ease: smoothEase }}
+            className="font-heading mt-4 text-2xl font-semibold text-[#1a1a1a]/80 md:text-3xl"
+          >
             Natural Refreshment
             <br />
             In Every Sip
-          </p>
+          </motion.p>
 
-          <p className="mt-6 max-w-md text-lg text-muted-foreground lg:mx-0 mx-auto">
+          <motion.p
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.95, duration: 0.8, ease: smoothEase }}
+            className="mt-6 max-w-md text-lg text-muted-foreground lg:mx-0 mx-auto"
+          >
             Crafted from fresh lemons, natural ingredients, and pure refreshment
             for modern lifestyles.
-          </p>
+          </motion.p>
         </motion.div>
 
         {/* Right — product visual */}

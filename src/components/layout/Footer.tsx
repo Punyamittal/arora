@@ -32,7 +32,7 @@ export function Footer() {
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-lemon/50 to-transparent"
       />
 
-      <div className="section-padding relative mx-auto max-w-7xl pb-8 pt-16 md:pt-20">
+      <div className="section-padding relative z-10 mx-auto max-w-7xl pb-8 pt-16 md:pt-20">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:gap-10">
           <div className="max-w-sm">
             <a href="/" aria-label="Home" className="inline-block">

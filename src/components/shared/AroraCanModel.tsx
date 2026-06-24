@@ -3,12 +3,96 @@
 import { Suspense, useMemo, useRef, type MutableRefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Center, Environment, useGLTF } from "@react-three/drei";
-import { MathUtils, type Group } from "three";
+import {
+  MathUtils,
+  MeshStandardMaterial,
+  SRGBColorSpace,
+  type Group,
+  type Material,
+  type Mesh,
+  type Object3D,
+  type Texture,
+} from "three";
 import { cn } from "@/lib/utils";
+import { gltfLoaderOptions } from "@/lib/gltfLoader";
 
 const DEFAULT_MODEL_PATH = "/models/arora.glb";
+const MODEL_PATHS = [
+  DEFAULT_MODEL_PATH,
+  "/models/lemon.glb",
+  "/models/mint2.glb",
+] as const;
 
-useGLTF.preload(DEFAULT_MODEL_PATH);
+for (const path of MODEL_PATHS) {
+  useGLTF.preload(
+    path,
+    gltfLoaderOptions.useDraco,
+    gltfLoaderOptions.useMeshopt,
+    gltfLoaderOptions.extendLoader
+  );
+}
+
+const COLOR_TEXTURE_KEYS = ["map", "emissiveMap"] as const;
+const DATA_TEXTURE_KEYS = [
+  "normalMap",
+  "roughnessMap",
+  "metalnessMap",
+  "aoMap",
+] as const;
+
+function cloneSceneWithMaterials(source: Object3D): Object3D {
+  const cloned = source.clone(true);
+
+  cloned.traverse((node) => {
+    const mesh = node as Mesh;
+    if (!mesh.isMesh) return;
+
+    mesh.material = Array.isArray(mesh.material)
+      ? mesh.material.map((material) => material.clone())
+      : mesh.material.clone();
+  });
+
+  prepareMaterials(cloned);
+  return cloned;
+}
+
+function prepareMaterials(object: Object3D) {
+  object.traverse((node) => {
+    if (!(node as Mesh).isMesh) return;
+
+    const mesh = node as Mesh;
+    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+
+    materials.forEach((material) => {
+      if (!material) return;
+
+      COLOR_TEXTURE_KEYS.forEach((key) => {
+        const texture = (material as Material & Record<string, Texture | null>)[key];
+        if (!texture) return;
+        texture.colorSpace = SRGBColorSpace;
+        texture.needsUpdate = true;
+      });
+
+      DATA_TEXTURE_KEYS.forEach((key) => {
+        const texture = (material as Material & Record<string, Texture | null>)[key];
+        if (!texture) return;
+        texture.needsUpdate = true;
+      });
+
+      if (!(material instanceof MeshStandardMaterial)) return;
+
+      // Exports like arora.glb ship with metallicFactor: 1, which makes label
+      // art read as chrome under studio lighting instead of showing colour.
+      if (material.map && material.metalness >= 0.95) {
+        material.metalness = 0.12;
+        material.metalnessMap = null;
+        material.roughness = Math.min(material.roughness, 0.55);
+      }
+
+      material.needsUpdate = true;
+    });
+  });
+}
 
 const sizeMap = {
   sm: { width: 180, height: 240 },
@@ -65,8 +149,13 @@ function AroraModel({
   const groupRef = useRef<Group>(null);
   const autoRotY = useRef(0);
   const elapsed = useRef(0);
-  const { scene } = useGLTF(modelPath);
-  const model = useMemo(() => scene.clone(), [scene]);
+  const { scene } = useGLTF(
+    modelPath,
+    gltfLoaderOptions.useDraco,
+    gltfLoaderOptions.useMeshopt,
+    gltfLoaderOptions.extendLoader
+  );
+  const model = useMemo(() => cloneSceneWithMaterials(scene), [scene]);
 
   useFrame((_, delta) => {
     const group = groupRef.current;

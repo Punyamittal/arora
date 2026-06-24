@@ -6,6 +6,7 @@ import { useGLTF } from "@react-three/drei";
 import { GLTFLoader } from "three-stdlib";
 import { peek } from "suspend-react";
 import { cn } from "@/lib/utils";
+import { gltfLoaderOptions } from "@/lib/gltfLoader";
 import { SiteLoader } from "./SiteLoader";
 
 const ARORA_MODEL_PATH = "/models/arora.glb";
@@ -24,7 +25,12 @@ function waitForWindowLoad(): Promise<void> {
 }
 
 function waitForGLTF(path: string, timeout = 120_000): Promise<boolean> {
-  useGLTF.preload(path);
+  useGLTF.preload(
+    path,
+    gltfLoaderOptions.useDraco,
+    gltfLoaderOptions.useMeshopt,
+    gltfLoaderOptions.extendLoader
+  );
 
   return new Promise((resolve) => {
     const start = Date.now();

@@ -26,7 +26,7 @@ export function ShowcaseSection() {
         <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-leaf blur-3xl" />
       </div>
 
-      <div className="section-padding relative mx-auto max-w-7xl">
+      <div className="section-padding relative z-10 mx-auto max-w-7xl">
         <SectionReveal direction="scale">
           <div className="grid items-center gap-12 lg:grid-cols-[1fr_auto_1fr]">
               {/* Left — marketing copy */}
