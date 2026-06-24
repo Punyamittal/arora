@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { smoothEase } from "@/lib/motion";
 import { ProductModel3D } from "@/components/shared/ProductModel3D";
+import { useModelAssets } from "@/components/shared/SiteLoaderProvider";
 import { CitrusSplash } from "@/components/shared/CitrusSplash";
 import { MintAccent } from "@/components/shared/MintAccent";
 
@@ -10,18 +11,54 @@ const titleContainer = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.14, delayChildren: 0.3 },
+    transition: { staggerChildren: 0.18, delayChildren: 0.25 },
   },
 };
 
-const titleLine = {
-  hidden: { opacity: 0, y: "110%" },
+const titleLineContainer = {
+  hidden: { opacity: 1 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.9, ease: smoothEase },
+    transition: { staggerChildren: 0.07 },
   },
 };
+
+const letterPop = {
+  hidden: { opacity: 0, scale: 0.35, y: 18 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 520,
+      damping: 16,
+      mass: 0.55,
+    },
+  },
+};
+
+function PopLine({
+  text,
+  className,
+}: {
+  text: string;
+  className?: string;
+}) {
+  return (
+    <motion.span variants={titleLineContainer} className="block">
+      {text.split("").map((letter, index) => (
+        <motion.span
+          key={`${text}-${index}`}
+          variants={letterPop}
+          className={`inline-block origin-bottom ${className ?? ""}`}
+        >
+          {letter}
+        </motion.span>
+      ))}
+    </motion.span>
+  );
+}
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -33,6 +70,8 @@ const fadeUp = {
 };
 
 export function HeroSection() {
+  const { aroraReady, mintReady } = useModelAssets();
+
   return (
     <section className="relative min-h-screen hero-gradient overflow-hidden">
       <div className="section-padding mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center gap-12 pt-36 md:pt-40 lg:flex-row lg:gap-8">
@@ -62,16 +101,8 @@ export function HeroSection() {
             animate="visible"
             className="font-heading mt-6 text-[clamp(3.5rem,10vw,6rem)] font-bold leading-[0.95] tracking-tight text-[#1a1a1a]"
           >
-            <span className="block overflow-hidden">
-              <motion.span variants={titleLine} className="block">
-                ARORA
-              </motion.span>
-            </span>
-            <span className="block overflow-hidden">
-              <motion.span variants={titleLine} className="block text-gradient-lemon">
-                LEMON
-              </motion.span>
-            </span>
+            <PopLine text="ARORA" />
+            <PopLine text="LEMON" className="text-gradient-lemon" />
           </motion.h1>
 
           <motion.p
@@ -120,13 +151,22 @@ export function HeroSection() {
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
             className="relative z-10"
           >
-            <ProductModel3D size="xl" autoRotate />
-            <MintAccent
-              seed="hero-arora-mint"
-              modelPath="/models/mint2.glb"
-              className="right-0 bottom-0 z-20 translate-x-1/3 translate-y-1/4"
-              scale={2.2}
-            />
+            {aroraReady ? (
+              <ProductModel3D size="xl" autoRotate />
+            ) : (
+              <div
+                aria-hidden
+                className="h-[30rem] w-80 animate-pulse rounded-[2rem] bg-lemon/10"
+              />
+            )}
+            {mintReady && (
+              <MintAccent
+                seed="hero-arora-mint"
+                modelPath="/models/mint2.glb"
+                className="right-0 bottom-0 z-20 translate-x-1/3 translate-y-1/4"
+                scale={2.2}
+              />
+            )}
           </motion.div>
 
           {/* Particles */}

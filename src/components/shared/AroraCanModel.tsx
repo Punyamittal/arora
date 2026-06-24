@@ -15,22 +15,9 @@ import {
 } from "three";
 import { cn } from "@/lib/utils";
 import { gltfLoaderOptions } from "@/lib/gltfLoader";
+import { MODEL_PATHS } from "@/lib/modelPaths";
 
-const DEFAULT_MODEL_PATH = "/models/arora.glb";
-const MODEL_PATHS = [
-  DEFAULT_MODEL_PATH,
-  "/models/lemon.glb",
-  "/models/mint2.glb",
-] as const;
-
-for (const path of MODEL_PATHS) {
-  useGLTF.preload(
-    path,
-    gltfLoaderOptions.useDraco,
-    gltfLoaderOptions.useMeshopt,
-    gltfLoaderOptions.extendLoader
-  );
-}
+const DEFAULT_MODEL_PATH = MODEL_PATHS.arora;
 
 const COLOR_TEXTURE_KEYS = ["map", "emissiveMap"] as const;
 const DATA_TEXTURE_KEYS = [

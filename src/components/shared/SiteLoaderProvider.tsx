@@ -1,103 +1,73 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { useGLTF } from "@react-three/drei";
-import { GLTFLoader } from "three-stdlib";
-import { peek } from "suspend-react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { cn } from "@/lib/utils";
-import { gltfLoaderOptions } from "@/lib/gltfLoader";
+import { preloadGltfModel, waitForGltfModel } from "@/lib/gltfLoader";
+import { MODEL_PATHS } from "@/lib/modelPaths";
 import { SiteLoader } from "./SiteLoader";
 
-const ARORA_MODEL_PATH = "/models/arora.glb";
-const LEMON_MODEL_PATH = "/models/lemon.glb";
-const MINT2_MODEL_PATH = "/models/mint2.glb";
+/** Never block the splash longer than this — page renders underneath immediately. */
+const MAX_SPLASH_MS = 4_500;
 
-function waitForWindowLoad(): Promise<void> {
-  return new Promise((resolve) => {
-    if (document.readyState === "complete") {
-      resolve();
-      return;
-    }
+type ModelAssetsContextValue = {
+  aroraReady: boolean;
+  mintReady: boolean;
+};
 
-    window.addEventListener("load", () => resolve(), { once: true });
-  });
-}
+const ModelAssetsContext = createContext<ModelAssetsContextValue>({
+  aroraReady: false,
+  mintReady: false,
+});
 
-function waitForGLTF(path: string, timeout = 120_000): Promise<boolean> {
-  useGLTF.preload(
-    path,
-    gltfLoaderOptions.useDraco,
-    gltfLoaderOptions.useMeshopt,
-    gltfLoaderOptions.extendLoader
-  );
-
-  return new Promise((resolve) => {
-    const start = Date.now();
-
-    const check = () => {
-      if (peek([GLTFLoader, path])) {
-        resolve(true);
-        return;
-      }
-
-      if (Date.now() - start > timeout) {
-        console.error(`Timed out preloading ${path}`);
-        resolve(false);
-        return;
-      }
-
-      requestAnimationFrame(check);
-    };
-
-    check();
-  });
+export function useModelAssets() {
+  return useContext(ModelAssetsContext);
 }
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export function SiteLoaderProvider({ children }: { children: React.ReactNode }) {
+export function SiteLoaderProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [hideOverlay, setHideOverlay] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(8);
+  const [aroraReady, setAroraReady] = useState(false);
+  const [mintReady, setMintReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      setProgress(5);
-      await waitForWindowLoad();
-      if (cancelled) return;
+      setProgress(15);
 
-      setProgress(20);
+      const modelsTask = (async () => {
+        preloadGltfModel(MODEL_PATHS.arora);
+        const aroraOk = await waitForGltfModel(MODEL_PATHS.arora);
+        if (cancelled) return;
+        setAroraReady(aroraOk);
+        setProgress(aroraOk ? 72 : 65);
 
-      const aroraReady = await waitForGLTF(ARORA_MODEL_PATH);
-      if (cancelled) return;
-      setProgress(aroraReady ? 45 : 40);
+        preloadGltfModel(MODEL_PATHS.mint2);
+        const mintOk = await waitForGltfModel(MODEL_PATHS.mint2);
+        if (cancelled) return;
+        setMintReady(mintOk);
+        setProgress(mintOk ? 90 : 84);
+      })();
 
-      const lemonReady = await waitForGLTF(LEMON_MODEL_PATH);
-      if (cancelled) return;
-      setProgress(lemonReady ? 70 : 65);
+      await Promise.race([modelsTask, wait(MAX_SPLASH_MS)]);
 
-      const mintReady = await waitForGLTF(MINT2_MODEL_PATH);
-      if (cancelled) return;
-      setProgress(mintReady ? 88 : 82);
-
-      await import("@/components/shared/AroraCanModel");
       if (cancelled) return;
 
       setProgress(100);
-      await wait(500);
+      setReady(true);
 
-      if (!cancelled) {
-        const modelsReady = aroraReady && lemonReady && mintReady;
-        if (!modelsReady) {
-          console.warn("Some 3D models failed to preload; the page will still render.");
-        }
-        setReady(true);
-      }
+      preloadGltfModel(MODEL_PATHS.lemon);
     }
 
     load();
@@ -116,11 +86,13 @@ export function SiteLoaderProvider({ children }: { children: React.ReactNode }) 
   }, [ready]);
 
   return (
-    <>
+    <ModelAssetsContext.Provider value={{ aroraReady, mintReady }}>
+      {children}
+
       {!hideOverlay && (
         <div
           className={cn(
-            "fixed inset-0 z-[9999] flex items-center justify-center hero-gradient transition-opacity duration-700 ease-out",
+            "fixed inset-0 z-[9999] flex items-center justify-center hero-gradient transition-opacity duration-300 ease-out",
             ready ? "pointer-events-none opacity-0" : "opacity-100"
           )}
           onTransitionEnd={() => {
@@ -130,16 +102,6 @@ export function SiteLoaderProvider({ children }: { children: React.ReactNode }) 
           <SiteLoader progress={progress} />
         </div>
       )}
-
-      {ready ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {children}
-        </motion.div>
-      ) : null}
-    </>
+    </ModelAssetsContext.Provider>
   );
 }
