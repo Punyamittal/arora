@@ -32,7 +32,7 @@ export function SiteLoader({ className, progress = 0 }: SiteLoaderProps) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.65, ease: smoothEase }}
-      className={cn("flex w-full max-w-md flex-col items-center px-6", className)}
+      className={cn("flex w-full max-w-xl flex-col items-center px-6", className)}
       aria-label={`Loading website, ${pct} percent`}
       role="status"
       aria-live="polite"
@@ -45,9 +45,9 @@ export function SiteLoader({ className, progress = 0 }: SiteLoaderProps) {
         <Image
           src="/logo.png"
           alt="Arora Lemon"
-          width={180}
-          height={64}
-          className="h-12 w-auto sm:h-14"
+          width={480}
+          height={172}
+          className="h-40 w-auto sm:h-48 md:h-56"
           priority
         />
       </motion.div>

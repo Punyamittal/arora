@@ -9,7 +9,7 @@ import { MintAccent } from "@/components/shared/MintAccent";
 export function HeroSection() {
   return (
     <section className="relative min-h-screen hero-gradient overflow-hidden">
-      <div className="section-padding mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center gap-12 pt-28 lg:flex-row lg:gap-8">
+      <div className="section-padding mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center gap-12 pt-36 md:pt-40 lg:flex-row lg:gap-8">
         {/* Left content */}
         <motion.div
           className="relative z-10 flex-1 text-center lg:text-left"

@@ -39,9 +39,9 @@ export function Footer() {
               <Image
                 src="/logo.png"
                 alt="Arora Lemon"
-                width={180}
-                height={64}
-                className="h-11 w-auto md:h-12"
+                width={400}
+                height={144}
+                className="h-24 w-auto md:h-32 lg:h-36"
               />
             </a>
             <p className="mt-5 text-base leading-relaxed text-white/70">

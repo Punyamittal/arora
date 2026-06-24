@@ -53,7 +53,7 @@ export function Navigation() {
             : "bg-transparent"
         )}
       >
-        <nav className="relative mx-auto flex max-w-7xl items-center justify-center px-6 py-4 md:px-12 lg:px-20">
+        <nav className="relative mx-auto flex max-w-7xl items-center justify-center px-6 py-5 md:px-12 md:py-6 lg:px-20">
           <div className="hidden items-center gap-8 md:flex lg:gap-12">
             {leftLinks.map((link) => (
               <a
@@ -69,9 +69,9 @@ export function Navigation() {
               <Image
                 src="/logo.png"
                 alt="Arora Lemon"
-                width={140}
-                height={48}
-                className="h-8 w-auto md:h-10"
+                width={360}
+                height={128}
+                className="h-16 w-auto md:h-20 lg:h-24"
                 priority
               />
             </a>
@@ -92,9 +92,9 @@ export function Navigation() {
               <Image
                 src="/logo.png"
                 alt="Arora Lemon"
-                width={120}
-                height={40}
-                className="h-8 w-auto"
+                width={280}
+                height={100}
+                className="h-14 w-auto"
                 priority
               />
             </a>
