@@ -40,7 +40,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       if (!target) return;
 
       event.preventDefault();
-      lenis.scrollTo(target, { offset: -88, duration: 1.2 });
+      lenis.scrollTo(anchor.hash, { offset: -88, duration: 1.2 });
     };
 
     document.addEventListener("click", onAnchorClick);
