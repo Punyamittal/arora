@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Center, Environment, useGLTF } from "@react-three/drei";
+import { Center, useGLTF } from "@react-three/drei";
 import {
   MathUtils,
   MeshStandardMaterial,
@@ -248,10 +248,11 @@ function Scene({
 
   return (
     <>
-      <ambientLight intensity={0.85} />
-      <directionalLight position={[4, 6, 5]} intensity={1.4} />
-      <directionalLight position={[-4, 2, -3]} intensity={0.5} />
-      <spotLight position={[0, 8, 4]} intensity={0.8} angle={0.4} penumbra={0.5} />
+      <ambientLight intensity={1.05} />
+      <hemisphereLight args={["#fffef5", "#e8f5e9", 0.45]} />
+      <directionalLight position={[4, 6, 5]} intensity={1.55} />
+      <directionalLight position={[-4, 2, -3]} intensity={0.6} />
+      <spotLight position={[0, 8, 4]} intensity={0.85} angle={0.4} penumbra={0.5} />
       <Suspense fallback={null}>
         {instances.map((instance, index) => (
           <AroraModel
@@ -268,7 +269,6 @@ function Scene({
             followCursor={followCursor}
           />
         ))}
-        <Environment preset="studio" />
       </Suspense>
     </>
   );

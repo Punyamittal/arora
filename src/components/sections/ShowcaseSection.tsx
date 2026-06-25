@@ -69,8 +69,12 @@ export function ShowcaseSection() {
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                   className="relative z-10"
                 >
-                  <ProductModel3D size="md" tilt={-12} autoRotate className="sm:hidden" />
-                  <ProductModel3D size="lg" tilt={-12} autoRotate className="hidden sm:block" />
+                  <ProductModel3D
+                    size="lg"
+                    tilt={-12}
+                    autoRotate
+                    className="max-sm:h-64 max-sm:w-44"
+                  />
                 </motion.div>
               </div>
 

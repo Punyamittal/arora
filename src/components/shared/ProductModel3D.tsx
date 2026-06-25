@@ -3,10 +3,14 @@
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 import type { ProductModel3DProps } from "./AroraCanModel";
+import { ModelPlaceholder } from "./ModelPlaceholder";
 
 const AroraCanModel = dynamic(
   () => import("./AroraCanModel").then((mod) => mod.ProductModel3D),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => <ModelPlaceholder />,
+  }
 );
 
 const sizeMap = {

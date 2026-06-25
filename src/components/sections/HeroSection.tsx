@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { smoothEase } from "@/lib/motion";
 import { ProductModel3D } from "@/components/shared/ProductModel3D";
-import { useModelAssets } from "@/components/shared/SiteLoaderProvider";
 import { CitrusSplash } from "@/components/shared/CitrusSplash";
 import { MintAccent } from "@/components/shared/MintAccent";
 
@@ -70,8 +69,6 @@ const fadeUp = {
 };
 
 export function HeroSection() {
-  const { aroraReady, mintReady } = useModelAssets();
-
   return (
     <section className="relative min-h-[100svh] hero-gradient overflow-x-clip overflow-y-hidden">
       <div className="section-padding mx-auto flex min-h-[100svh] max-w-7xl flex-col items-center justify-center gap-8 pt-28 sm:gap-10 sm:pt-32 md:pt-36 lg:flex-row lg:gap-8 lg:pt-40">
@@ -155,22 +152,13 @@ export function HeroSection() {
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
             className="relative z-10 w-full"
           >
-            {aroraReady ? (
-              <ProductModel3D size="xl" autoRotate />
-            ) : (
-              <div
-                aria-hidden
-                className="mx-auto h-[min(20rem,52vh)] w-[min(14rem,72vw)] animate-pulse rounded-[2rem] bg-lemon/10 sm:h-[26rem] sm:w-72 md:h-[30rem] md:w-80"
-              />
-            )}
-            {mintReady && (
-              <MintAccent
-                seed="hero-arora-mint"
-                modelPath="/models/mint2.glb"
-                className="right-0 bottom-0 z-20 hidden translate-x-1/4 translate-y-1/4 sm:block md:translate-x-1/3"
-                scale={2.2}
-              />
-            )}
+            <ProductModel3D size="xl" autoRotate />
+            <MintAccent
+              seed="hero-arora-mint"
+              modelPath="/models/mint2.glb"
+              className="right-0 bottom-0 z-20 hidden translate-x-1/4 translate-y-1/4 sm:block md:translate-x-1/3"
+              scale={2.2}
+            />
           </motion.div>
 
           {/* Particles */}
