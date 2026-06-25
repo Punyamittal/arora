@@ -28,9 +28,9 @@ export function ShowcaseSection() {
 
       <div className="section-padding relative z-10 mx-auto max-w-7xl">
         <SectionReveal direction="scale">
-          <div className="grid items-center gap-12 lg:grid-cols-[1fr_auto_1fr]">
+          <div className="grid items-center gap-10 sm:gap-12 lg:grid-cols-[1fr_auto_1fr] lg:gap-8">
               {/* Left — marketing copy */}
-              <div className="relative text-center lg:text-left">
+              <div className="relative order-1 text-center lg:text-left">
                 <MintAccent
                   seed="showcase-copy"
                   className="right-0 top-0 hidden md:block lg:-right-8"
@@ -51,12 +51,17 @@ export function ShowcaseSection() {
               </div>
 
               {/* Center — product burst */}
-              <div className="relative flex items-center justify-center py-8">
+              <div className="relative order-2 flex items-center justify-center py-4 sm:py-8">
                 <motion.div
                   animate={{ rotate: [-8, 8, -8] }}
                   transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute scale-75 sm:scale-100"
                 >
-                  <CitrusSplash color="white" size={350} className="absolute -inset-8 opacity-60" />
+                  <CitrusSplash
+                    color="white"
+                    size={350}
+                    className="max-w-[min(90vw,22rem)] opacity-60"
+                  />
                 </motion.div>
 
                 <motion.div
@@ -64,12 +69,13 @@ export function ShowcaseSection() {
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                   className="relative z-10"
                 >
-                  <ProductModel3D size="lg" tilt={-12} autoRotate />
+                  <ProductModel3D size="md" tilt={-12} autoRotate className="sm:hidden" />
+                  <ProductModel3D size="lg" tilt={-12} autoRotate className="hidden sm:block" />
                 </motion.div>
               </div>
 
               {/* Right — lead form */}
-              <div className="glass rounded-[2rem] p-8 shadow-xl">
+              <div className="glass order-3 rounded-2xl p-5 shadow-xl sm:rounded-[2rem] sm:p-8">
                 {submitted ? (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}

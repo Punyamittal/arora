@@ -62,7 +62,7 @@ export function WhySection() {
   return (
     <section
       id="about"
-      className="relative overflow-x-clip overflow-y-visible bg-white px-6 pt-24 pb-0 md:px-12 lg:px-20 xl:px-28"
+      className="relative overflow-x-clip overflow-y-visible bg-white px-4 pt-20 pb-16 sm:px-6 sm:pt-24 sm:pb-0 md:px-12 lg:px-20 xl:px-28"
     >
       <div className="mx-auto max-w-7xl">
         <div className="relative pb-8 pt-4 md:pb-12 md:pt-6">
@@ -71,7 +71,7 @@ export function WhySection() {
             className="about-diagonal-panel pointer-events-none absolute -left-6 -right-6 inset-y-0 md:-left-12 md:-right-12 lg:-left-20 lg:-right-20"
           />
 
-          <div className="relative z-10 grid items-center gap-16 lg:grid-cols-2">
+          <div className="relative z-10 grid items-center gap-10 sm:gap-12 lg:grid-cols-2 lg:gap-16">
             <SectionReveal direction="left" className="relative">
               <span className="text-sm font-semibold uppercase tracking-widest text-leaf">
                 Why Arora Lemon
@@ -81,13 +81,13 @@ export function WhySection() {
                 <br />
                 Refreshment
               </h2>
-              <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:mt-6 sm:text-lg">
                 At ARORA LEMON, we believe refreshment should be as pure as nature
                 intended. Every can is crafted with hand-selected lemons, sparkling
                 spring water, and a commitment to quality that you can taste from
                 the very first sip.
               </p>
-              <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+              <p className="mt-3 text-base leading-relaxed text-muted-foreground sm:mt-4 sm:text-lg">
                 Born from a passion for authentic flavour and modern living, our
                 beverages deliver the perfect balance of tangy citrus brightness
                 and smooth, satisfying refreshment.
@@ -97,12 +97,12 @@ export function WhySection() {
               </div>
             </SectionReveal>
 
-            <SectionReveal direction="right" className="flex items-center justify-center">
+            <SectionReveal direction="right" className="flex items-center justify-center px-2 sm:px-0">
               <ProductModel3D
                 modelPath="/models/lemon.glb"
                 scale={6.5}
                 size="2xl"
-                className="h-[min(38rem,72vh)] w-full max-w-[28rem]"
+                className="mx-auto"
                 cameraDistance={3.4}
                 autoRotate
                 rotateSpeed={0.65}
@@ -112,12 +112,12 @@ export function WhySection() {
           </div>
         </div>
 
-        <div ref={handTriggerRef} className="relative z-10 mt-16">
-          <div className="flex flex-col gap-7 lg:ml-auto lg:max-w-lg">
+        <div ref={handTriggerRef} className="relative z-10 mt-10 sm:mt-16">
+          <div className="flex flex-col gap-5 sm:gap-7 lg:ml-auto lg:max-w-lg">
             {features.map((feature, i) => (
               <SectionReveal key={feature.title} delay={i * 0.1} direction="right">
                 <div className="py-1">
-                  <h3 className="font-artistic text-[1.75rem] font-semibold leading-snug tracking-tight text-[#1a1a1a] md:text-[2rem]">
+                  <h3 className="font-artistic text-2xl font-semibold leading-snug tracking-tight text-[#1a1a1a] sm:text-[1.75rem] md:text-[2rem]">
                     {feature.title}
                   </h3>
                   <p className="font-artistic mt-2 text-base font-normal italic leading-relaxed text-muted-foreground md:text-lg">
@@ -132,8 +132,8 @@ export function WhySection() {
 
       <HandRevealImage
         isVisible={isHandInView}
-        className="pointer-events-none absolute bottom-0 left-5 z-20 -ml-6 md:left-6 md:-ml-12 lg:left-8 lg:-ml-20 xl:left-10 xl:-ml-28"
-        imageClassName="w-[min(92vw,560px)] lg:w-[min(34vw,560px)]"
+        className="pointer-events-none absolute bottom-0 left-5 z-20 -ml-6 hidden md:left-6 md:-ml-12 md:block lg:left-8 lg:-ml-20 xl:left-10 xl:-ml-28"
+        imageClassName="w-[min(34vw,560px)]"
       />
     </section>
   );

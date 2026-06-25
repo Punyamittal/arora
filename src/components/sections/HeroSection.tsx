@@ -73,12 +73,12 @@ export function HeroSection() {
   const { aroraReady, mintReady } = useModelAssets();
 
   return (
-    <section className="relative min-h-screen hero-gradient overflow-hidden">
-      <div className="section-padding mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center gap-12 pt-36 md:pt-40 lg:flex-row lg:gap-8">
+    <section className="relative min-h-[100svh] hero-gradient overflow-x-clip overflow-y-hidden">
+      <div className="section-padding mx-auto flex min-h-[100svh] max-w-7xl flex-col items-center justify-center gap-8 pt-28 sm:gap-10 sm:pt-32 md:pt-36 lg:flex-row lg:gap-8 lg:pt-40">
         {/* Left content */}
         <motion.div
-          className="relative z-10 flex-1 text-center lg:text-left"
-          initial={{ opacity: 0, x: -60 }}
+          className="relative z-10 w-full flex-1 text-center lg:text-left"
+          initial={{ opacity: 0, x: 0 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, ease: smoothEase }}
         >
@@ -99,7 +99,7 @@ export function HeroSection() {
             variants={titleContainer}
             initial="hidden"
             animate="visible"
-            className="font-heading mt-6 text-[clamp(3.5rem,10vw,6rem)] font-bold leading-[0.95] tracking-tight text-[#1a1a1a]"
+            className="font-heading mt-4 text-[clamp(2.75rem,12vw,6rem)] font-bold leading-[0.95] tracking-tight text-[#1a1a1a] sm:mt-6"
           >
             <PopLine text="ARORA" />
             <PopLine text="LEMON" className="text-gradient-lemon" />
@@ -110,7 +110,7 @@ export function HeroSection() {
             initial="hidden"
             animate="visible"
             transition={{ delay: 0.75, duration: 0.8, ease: smoothEase }}
-            className="font-heading mt-4 text-2xl font-semibold text-[#1a1a1a]/80 md:text-3xl"
+            className="font-heading mt-3 text-xl font-semibold text-[#1a1a1a]/80 sm:mt-4 sm:text-2xl md:text-3xl"
           >
             Natural Refreshment
             <br />
@@ -122,7 +122,7 @@ export function HeroSection() {
             initial="hidden"
             animate="visible"
             transition={{ delay: 0.95, duration: 0.8, ease: smoothEase }}
-            className="mt-6 max-w-md text-lg text-muted-foreground lg:mx-0 mx-auto"
+            className="mt-4 max-w-md px-2 text-base text-muted-foreground sm:mt-6 sm:px-0 sm:text-lg lg:mx-0 mx-auto"
           >
             Crafted from fresh lemons, natural ingredients, and pure refreshment
             for modern lifestyles.
@@ -131,39 +131,43 @@ export function HeroSection() {
 
         {/* Right — product visual */}
         <motion.div
-          className="relative flex flex-1 items-center justify-center"
-          initial={{ opacity: 0, scale: 0.8 }}
+          className="relative flex w-full max-w-sm flex-1 items-center justify-center sm:max-w-md lg:max-w-none"
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.1, delay: 0.2, ease: smoothEase }}
         >
           {/* Splash behind */}
           <motion.div
-            className="absolute"
+            className="absolute scale-75 sm:scale-90 md:scale-100"
             animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           >
-            <CitrusSplash color="yellow" size={500} className="opacity-80" />
+            <CitrusSplash
+              color="yellow"
+              size={500}
+              className="max-w-[min(100vw,28rem)] opacity-80"
+            />
           </motion.div>
 
           {/* 3D product model */}
           <motion.div
             animate={{ y: [-8, 8, -8] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="relative z-10"
+            className="relative z-10 w-full"
           >
             {aroraReady ? (
               <ProductModel3D size="xl" autoRotate />
             ) : (
               <div
                 aria-hidden
-                className="h-[30rem] w-80 animate-pulse rounded-[2rem] bg-lemon/10"
+                className="mx-auto h-[min(20rem,52vh)] w-[min(14rem,72vw)] animate-pulse rounded-[2rem] bg-lemon/10 sm:h-[26rem] sm:w-72 md:h-[30rem] md:w-80"
               />
             )}
             {mintReady && (
               <MintAccent
                 seed="hero-arora-mint"
                 modelPath="/models/mint2.glb"
-                className="right-0 bottom-0 z-20 translate-x-1/3 translate-y-1/4"
+                className="right-0 bottom-0 z-20 hidden translate-x-1/4 translate-y-1/4 sm:block md:translate-x-1/3"
                 scale={2.2}
               />
             )}
@@ -194,7 +198,7 @@ export function HeroSection() {
 
       {/* Scroll indicator */}
       <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 sm:bottom-8 sm:block"
         animate={{ y: [0, 8, 0] }}
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
       >

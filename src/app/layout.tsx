@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { SiteLoaderProvider } from "@/components/shared/SiteLoaderProvider";
 import { SmoothScroll } from "@/components/shared/SmoothScroll";
@@ -15,6 +15,13 @@ export const metadata: Metadata = {
   description:
     "Crafted from fresh lemons, natural ingredients, and pure refreshment. Discover Classic Lemon, Lemon Mint, and Lemon Berry.",
   keywords: ["lemonade", "natural beverage", "ARORA LEMON", "refreshment"],
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

@@ -187,7 +187,7 @@ export function JourneyTrail() {
   return (
     <div
       ref={trailRef}
-      className="pointer-events-none absolute inset-x-0 top-0 z-[1] overflow-hidden"
+      className="pointer-events-none absolute inset-x-0 top-0 z-[1] overflow-hidden max-sm:opacity-80"
       aria-hidden
     >
       <svg

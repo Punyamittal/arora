@@ -40,6 +40,13 @@ export function Navigation() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
   return (
     <>
       <motion.header
@@ -53,7 +60,7 @@ export function Navigation() {
             : "bg-transparent"
         )}
       >
-        <nav className="relative mx-auto flex max-w-7xl items-center justify-center px-6 py-5 md:px-12 md:py-6 lg:px-20">
+        <nav className="safe-top relative mx-auto flex max-w-7xl items-center justify-center px-4 py-4 sm:px-6 sm:py-5 md:px-12 md:py-6 lg:px-20">
           <div className="hidden items-center gap-8 md:flex lg:gap-12">
             {leftLinks.map((link) => (
               <a
@@ -116,7 +123,7 @@ export function Navigation() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-white pt-20 md:hidden"
+            className="fixed inset-0 z-40 overflow-y-auto bg-white pt-[calc(4.5rem+env(safe-area-inset-top))] md:hidden"
           >
             <div className="flex flex-col items-center gap-8 p-8">
               {navLinks.map((link) => (

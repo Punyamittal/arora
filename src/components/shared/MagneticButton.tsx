@@ -56,7 +56,7 @@ export function MagneticButton({
       whileHover={{ scale: 1.04 }}
       whileTap={{ scale: 0.97 }}
       className={cn(
-        "relative inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-lg font-semibold transition-shadow duration-300",
+        "relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold transition-shadow duration-300 sm:px-8 sm:py-4 sm:text-lg",
         variantStyles[variant],
         className
       )}

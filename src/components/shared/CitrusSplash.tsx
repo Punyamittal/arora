@@ -23,7 +23,7 @@ export function CitrusSplash({
       viewBox="0 0 400 400"
       width={size}
       height={size}
-      className={cn("pointer-events-none", className)}
+      className={cn("pointer-events-none h-auto max-w-full", className)}
       aria-hidden
     >
       <defs>

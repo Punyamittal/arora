@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useRef, type MutableRefObject } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Center, Environment, useGLTF } from "@react-three/drei";
 import {
@@ -87,7 +87,37 @@ const sizeMap = {
   lg: { width: 280, height: 380 },
   xl: { width: 340, height: 480 },
   "2xl": { width: 460, height: 620 },
-};
+} as const;
+
+function useCoarsePointer() {
+  const [coarse, setCoarse] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: coarse)");
+    const update = () => setCoarse(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return coarse;
+}
+
+function useMobileDpr() {
+  const [dpr, setDpr] = useState(1);
+
+  useEffect(() => {
+    const update = () => {
+      const isMobile = window.innerWidth < 640;
+      setDpr(isMobile ? 1 : Math.min(window.devicePixelRatio, 1.5));
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  return dpr;
+}
 
 interface PointerState {
   x: number;
@@ -261,7 +291,7 @@ export interface ProductModel3DProps {
 export function ProductModel3D({
   modelPath = DEFAULT_MODEL_PATH,
   scale,
-  size = "lg",
+  size: _size = "lg",
   className,
   autoRotate = true,
   rotateSpeed = 0.35,
@@ -271,12 +301,14 @@ export function ProductModel3D({
   count = 1,
   cameraDistance = 4.2,
 }: ProductModel3DProps) {
-  const dimensions = sizeMap[size];
   const tiltRad = (tilt * Math.PI) / 180;
   const pointer = useRef<PointerState>({ x: 0, y: 0, active: false });
+  const isCoarsePointer = useCoarsePointer();
+  const dpr = useMobileDpr();
+  const enableCursorFollow = followCursor && !isCoarsePointer;
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!followCursor) return;
+    if (!enableCursorFollow) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
     pointer.current = {
@@ -292,16 +324,15 @@ export function ProductModel3D({
 
   return (
     <div
-      className={cn("relative", className)}
-      style={{ width: dimensions.width, height: dimensions.height }}
+      className={cn("relative h-full w-full touch-pan-y", className)}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
     >
       <Canvas
         camera={{ position: [0, 0.15, cameraDistance], fov: 38 }}
         gl={{ alpha: true, antialias: true }}
-        style={{ background: "transparent" }}
-        dpr={[1, 1.5]}
+        style={{ background: "transparent", width: "100%", height: "100%" }}
+        dpr={dpr}
       >
         <Scene
           modelPath={modelPath}
@@ -311,7 +342,7 @@ export function ProductModel3D({
           motionIntensity={motionIntensity}
           rotation={[tiltRad, 0, 0]}
           pointer={pointer}
-          followCursor={followCursor}
+          followCursor={enableCursorFollow}
           count={count}
         />
       </Canvas>
