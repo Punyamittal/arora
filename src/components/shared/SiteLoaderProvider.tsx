@@ -2,8 +2,6 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { preloadGltfModel } from "@/lib/gltfLoader";
-import { MODEL_PATHS } from "@/lib/modelPaths";
 import { SiteLoader } from "./SiteLoader";
 
 /** Never block the splash longer than this — page renders underneath immediately. */
@@ -22,22 +20,16 @@ export function SiteLoaderProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     async function load() {
-      setProgress(20);
+      setProgress(35);
+      await wait(MAX_SPLASH_MS / 2);
+      if (cancelled) return;
 
-      // Best-effort preloads — 3D components mount independently and load via useGLTF.
-      preloadGltfModel(MODEL_PATHS.arora);
-      setProgress(45);
-      preloadGltfModel(MODEL_PATHS.mint2);
-      setProgress(65);
-
-      await wait(MAX_SPLASH_MS);
-
+      setProgress(72);
+      await wait(MAX_SPLASH_MS / 2);
       if (cancelled) return;
 
       setProgress(100);
       setReady(true);
-
-      preloadGltfModel(MODEL_PATHS.lemon);
     }
 
     load();

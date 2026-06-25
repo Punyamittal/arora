@@ -2,8 +2,6 @@
 
 import { Texture } from "three";
 import { useGLTF } from "@react-three/drei";
-import { GLTFLoader } from "three-stdlib";
-import { peek } from "suspend-react";
 import type { GLTFLoader as GLTFLoaderType, GLTFLoaderPlugin } from "three-stdlib";
 
 type GltfImageDef = {
@@ -19,7 +17,57 @@ type GltfParser = {
   loadImageSource: (sourceIndex: number, loader: unknown) => Promise<Texture>;
 };
 
+type GltfLoadResult = Parameters<NonNullable<GLTFLoaderType["load"]>>[1] extends (
+  result: infer R
+) => void
+  ? R
+  : unknown;
+
 const EMBEDDED_IMAGE_PLUGIN_NAME = "ARORA_embedded_image_fix";
+const MAX_FETCH_RETRIES = 3;
+const inFlightBuffers = new Map<string, Promise<ArrayBuffer>>();
+
+export function resolveModelUrl(path: string): string {
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+  if (typeof window === "undefined") {
+    return path;
+  }
+  return new URL(path, window.location.origin).href;
+}
+
+async function fetchModelBuffer(url: string): Promise<ArrayBuffer> {
+  const absoluteUrl = resolveModelUrl(url);
+  const existing = inFlightBuffers.get(absoluteUrl);
+  if (existing) return existing;
+
+  const task = (async () => {
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt < MAX_FETCH_RETRIES; attempt++) {
+      try {
+        const response = await fetch(absoluteUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status} for ${absoluteUrl}`);
+        }
+        return await response.arrayBuffer();
+      } catch (error) {
+        lastError = error;
+        if (attempt < MAX_FETCH_RETRIES - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+        }
+      }
+    }
+
+    throw lastError ?? new Error(`Failed to fetch ${absoluteUrl}`);
+  })().finally(() => {
+    inFlightBuffers.delete(absoluteUrl);
+  });
+
+  inFlightBuffers.set(absoluteUrl, task);
+  return task;
+}
 
 function blobToDataURL(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -85,13 +133,51 @@ function patchEmbeddedImageLoading(parser: GltfParser) {
   };
 }
 
+function toLoadError(error: unknown): ErrorEvent {
+  const message = error instanceof Error ? error.message : String(error);
+  return new ErrorEvent("error", { message });
+}
+
+function patchReliableGlbLoading(loader: GLTFLoaderType) {
+  const originalLoad = loader.load.bind(loader);
+
+  loader.load = ((
+    url: string,
+    onLoad?: (result: GltfLoadResult) => void,
+    onProgress?: (event: ProgressEvent<EventTarget>) => void,
+    onError?: (event: ErrorEvent) => void
+  ) => {
+    if (typeof url !== "string" || !url.toLowerCase().includes(".glb")) {
+      return originalLoad(
+        url,
+        onLoad ?? (() => {}),
+        onProgress,
+        onError
+      );
+    }
+
+    void fetchModelBuffer(url)
+      .then((buffer) => {
+        loader.parse(
+          buffer,
+          resolveModelUrl(url),
+          (gltf) => onLoad?.(gltf),
+          (error) => onError?.(toLoadError(error))
+        );
+      })
+      .catch((error) => onError?.(toLoadError(error)));
+  }) as typeof loader.load;
+}
+
 let configuredLoaders: WeakSet<GLTFLoaderType> | null = null;
 
-/** Reliable embedded-texture loading for large GLB files in Next.js dev. */
+/** Reliable embedded-texture + fetch loading for large GLB files. */
 export function configureProductGltfLoader(loader: GLTFLoaderType) {
   configuredLoaders ??= new WeakSet();
   if (configuredLoaders.has(loader)) return;
   configuredLoaders.add(loader);
+
+  patchReliableGlbLoading(loader);
 
   loader.register((parser) => {
     patchEmbeddedImageLoading(parser as unknown as GltfParser);
@@ -115,28 +201,4 @@ export function preloadGltfModel(path: string) {
     gltfLoaderOptions.useMeshopt,
     gltfLoaderOptions.extendLoader
   );
-}
-
-export function waitForGltfModel(path: string, timeout = 45_000): Promise<boolean> {
-  preloadGltfModel(path);
-
-  return new Promise((resolve) => {
-    const start = Date.now();
-
-    const check = () => {
-      if (peek([GLTFLoader, path])) {
-        resolve(true);
-        return;
-      }
-
-      if (Date.now() - start > timeout) {
-        resolve(false);
-        return;
-      }
-
-      requestAnimationFrame(check);
-    };
-
-    check();
-  });
 }

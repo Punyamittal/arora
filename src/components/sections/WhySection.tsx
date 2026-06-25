@@ -5,7 +5,7 @@ import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { SectionReveal } from "@/components/shared/SectionReveal";
 import { MagneticButton } from "@/components/shared/MagneticButton";
-import { ProductModel3D } from "@/components/shared/ProductModel3D";
+import { LazyProductModel3D } from "@/components/shared/LazyProductModel3D";
 import { cn } from "@/lib/utils";
 
 function HandRevealImage({
@@ -98,7 +98,7 @@ export function WhySection() {
             </SectionReveal>
 
             <SectionReveal direction="right" className="flex items-center justify-center px-2 sm:px-0">
-              <ProductModel3D
+              <LazyProductModel3D
                 modelPath="/models/lemon.glb"
                 scale={6.5}
                 size="2xl"

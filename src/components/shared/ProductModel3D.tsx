@@ -2,7 +2,9 @@
 
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
+import { MODEL_PATHS } from "@/lib/modelPaths";
 import type { ProductModel3DProps } from "./AroraCanModel";
+import { ModelErrorBoundary } from "./ModelErrorBoundary";
 import { ModelPlaceholder } from "./ModelPlaceholder";
 
 const AroraCanModel = dynamic(
@@ -22,16 +24,25 @@ const sizeMap = {
     "h-[min(24rem,58vh)] w-full max-w-[18rem] sm:h-[32rem] sm:max-w-[24rem] md:h-[38rem] md:max-w-[28rem]",
 };
 
-export function ProductModel3D(props: ProductModel3DProps) {
+export function ProductModel3D({
+  modelPath,
+  className,
+  size = "lg",
+  ...props
+}: ProductModel3DProps) {
+  const resolvedPath = modelPath ?? MODEL_PATHS.arora;
+
   return (
-    <div
-      className={cn(
-        "relative mx-auto max-w-full shrink-0",
-        sizeMap[props.size ?? "lg"],
-        props.className
-      )}
+    <ModelErrorBoundary
+      modelPath={resolvedPath}
+      className={cn("relative mx-auto max-w-full shrink-0", sizeMap[size], className)}
     >
-      <AroraCanModel {...props} className="absolute inset-0 h-full w-full" />
-    </div>
+      <AroraCanModel
+        {...props}
+        modelPath={resolvedPath}
+        size={size}
+        className="absolute inset-0 h-full w-full"
+      />
+    </ModelErrorBoundary>
   );
 }

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { SectionReveal } from "@/components/shared/SectionReveal";
 import { MagneticButton } from "@/components/shared/MagneticButton";
-import { ProductModel3D } from "@/components/shared/ProductModel3D";
+import { LazyProductModel3D } from "@/components/shared/LazyProductModel3D";
 import { CitrusSplash } from "@/components/shared/CitrusSplash";
 import { MintAccent } from "@/components/shared/MintAccent";
 import { Input } from "@/components/ui/input";
@@ -69,7 +69,7 @@ export function ShowcaseSection() {
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                   className="relative z-10"
                 >
-                  <ProductModel3D
+                  <LazyProductModel3D
                     size="lg"
                     tilt={-12}
                     autoRotate
