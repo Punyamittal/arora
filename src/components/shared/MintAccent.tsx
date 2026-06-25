@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ProductModel3D } from "@/components/shared/ProductModel3D";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_MINT_MODEL_PATH = "/models/mint2.glb";
+const MINT_LOAD_DELAY_MS = 1_500;
 
 interface MintAccentProps {
   seed: string;
@@ -19,6 +21,15 @@ export function MintAccent({
   scale = 2.4,
   modelPath = DEFAULT_MINT_MODEL_PATH,
 }: MintAccentProps) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setReady(true), MINT_LOAD_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  if (!ready) return null;
+
   return (
     <div
       aria-hidden

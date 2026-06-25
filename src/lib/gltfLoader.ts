@@ -26,6 +26,7 @@ type GltfLoadResult = Parameters<NonNullable<GLTFLoaderType["load"]>>[1] extends
 const EMBEDDED_IMAGE_PLUGIN_NAME = "ARORA_embedded_image_fix";
 const MAX_FETCH_RETRIES = 3;
 const inFlightBuffers = new Map<string, Promise<ArrayBuffer>>();
+const loadedBuffers = new Map<string, ArrayBuffer>();
 
 export function resolveModelUrl(path: string): string {
   if (path.startsWith("http://") || path.startsWith("https://")) {
@@ -39,6 +40,9 @@ export function resolveModelUrl(path: string): string {
 
 async function fetchModelBuffer(url: string): Promise<ArrayBuffer> {
   const absoluteUrl = resolveModelUrl(url);
+  const cached = loadedBuffers.get(absoluteUrl);
+  if (cached) return cached;
+
   const existing = inFlightBuffers.get(absoluteUrl);
   if (existing) return existing;
 
@@ -47,11 +51,13 @@ async function fetchModelBuffer(url: string): Promise<ArrayBuffer> {
 
     for (let attempt = 0; attempt < MAX_FETCH_RETRIES; attempt++) {
       try {
-        const response = await fetch(absoluteUrl);
+        const response = await fetch(absoluteUrl, { cache: "force-cache" });
         if (!response.ok) {
           throw new Error(`HTTP ${response.status} for ${absoluteUrl}`);
         }
-        return await response.arrayBuffer();
+        const buffer = await response.arrayBuffer();
+        loadedBuffers.set(absoluteUrl, buffer);
+        return buffer;
       } catch (error) {
         lastError = error;
         if (attempt < MAX_FETCH_RETRIES - 1) {
@@ -67,6 +73,22 @@ async function fetchModelBuffer(url: string): Promise<ArrayBuffer> {
 
   inFlightBuffers.set(absoluteUrl, task);
   return task;
+}
+
+export function prefetchModel(path: string): Promise<ArrayBuffer> {
+  return fetchModelBuffer(path);
+}
+
+export function clearModelCache(path?: string) {
+  if (!path) {
+    loadedBuffers.clear();
+    inFlightBuffers.clear();
+    return;
+  }
+
+  const absoluteUrl = resolveModelUrl(path);
+  loadedBuffers.delete(absoluteUrl);
+  inFlightBuffers.delete(absoluteUrl);
 }
 
 function blobToDataURL(blob: Blob): Promise<string> {

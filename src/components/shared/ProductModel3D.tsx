@@ -1,7 +1,9 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
+import { clearModelCache, prefetchModel } from "@/lib/gltfLoader";
 import { MODEL_PATHS } from "@/lib/modelPaths";
 import type { ProductModel3DProps } from "./AroraCanModel";
 import { ModelErrorBoundary } from "./ModelErrorBoundary";
@@ -31,12 +33,58 @@ export function ProductModel3D({
   ...props
 }: ProductModel3DProps) {
   const resolvedPath = modelPath ?? MODEL_PATHS.arora;
+  const [attempt, setAttempt] = useState(0);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const containerClass = cn(
+    "relative mx-auto max-w-full shrink-0",
+    sizeMap[size],
+    className
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    setStatus("loading");
+
+    prefetchModel(resolvedPath)
+      .then(() => {
+        if (!cancelled) setStatus("ready");
+      })
+      .catch(() => {
+        if (!cancelled) setStatus("error");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [resolvedPath, attempt]);
+
+  const retry = useCallback(() => {
+    clearModelCache(resolvedPath);
+    setAttempt((value) => value + 1);
+  }, [resolvedPath]);
+
+  if (status === "loading") {
+    return <ModelPlaceholder className={containerClass} />;
+  }
+
+  if (status === "error") {
+    return (
+      <button
+        type="button"
+        onClick={retry}
+        className={cn(
+          "flex flex-col items-center justify-center gap-2 rounded-[2rem] border border-leaf/20 bg-lemon/10 px-4 text-center text-sm text-muted-foreground transition-colors hover:bg-lemon/15",
+          containerClass
+        )}
+      >
+        <span>3D preview unavailable</span>
+        <span className="font-medium text-leaf">Tap to retry</span>
+      </button>
+    );
+  }
 
   return (
-    <ModelErrorBoundary
-      modelPath={resolvedPath}
-      className={cn("relative mx-auto max-w-full shrink-0", sizeMap[size], className)}
-    >
+    <ModelErrorBoundary modelPath={resolvedPath} className={containerClass}>
       <AroraCanModel
         {...props}
         modelPath={resolvedPath}

@@ -2,6 +2,7 @@
 
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { useGLTF } from "@react-three/drei";
+import { clearModelCache } from "@/lib/gltfLoader";
 import { cn } from "@/lib/utils";
 import { ModelPlaceholder } from "./ModelPlaceholder";
 
@@ -32,6 +33,7 @@ export class ModelErrorBoundary extends Component<
 
   private retry = () => {
     if (this.props.modelPath) {
+      clearModelCache(this.props.modelPath);
       useGLTF.clear(this.props.modelPath);
     }
     this.setState((state) => ({
