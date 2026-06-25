@@ -1,8 +1,7 @@
 "use client";
 
-import { Texture } from "three";
-import { useGLTF } from "@react-three/drei";
-import type { GLTFLoader as GLTFLoaderType, GLTFLoaderPlugin } from "three-stdlib";
+import { Texture, type Object3D } from "three";
+import { GLTFLoader, type GLTFLoader as GLTFLoaderType, type GLTFLoaderPlugin } from "three-stdlib";
 
 type GltfImageDef = {
   bufferView?: number;
@@ -25,8 +24,10 @@ type GltfLoadResult = Parameters<NonNullable<GLTFLoaderType["load"]>>[1] extends
 
 const EMBEDDED_IMAGE_PLUGIN_NAME = "ARORA_embedded_image_fix";
 const MAX_FETCH_RETRIES = 3;
+const LARGE_FILE_TIMEOUT_MS = 180_000;
 const inFlightBuffers = new Map<string, Promise<ArrayBuffer>>();
 const loadedBuffers = new Map<string, ArrayBuffer>();
+const loadedScenes = new Map<string, Promise<Object3D>>();
 
 export function resolveModelUrl(path: string): string {
   if (path.startsWith("http://") || path.startsWith("https://")) {
@@ -50,19 +51,35 @@ async function fetchModelBuffer(url: string): Promise<ArrayBuffer> {
     let lastError: unknown;
 
     for (let attempt = 0; attempt < MAX_FETCH_RETRIES; attempt++) {
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(
+        () => controller.abort(),
+        LARGE_FILE_TIMEOUT_MS
+      );
+
       try {
-        const response = await fetch(absoluteUrl, { cache: "force-cache" });
+        const response = await fetch(absoluteUrl, {
+          cache: process.env.NODE_ENV === "production" ? "force-cache" : "no-store",
+          signal: controller.signal,
+        });
         if (!response.ok) {
           throw new Error(`HTTP ${response.status} for ${absoluteUrl}`);
         }
+
         const buffer = await response.arrayBuffer();
+        if (buffer.byteLength === 0) {
+          throw new Error(`Empty response for ${absoluteUrl}`);
+        }
+
         loadedBuffers.set(absoluteUrl, buffer);
         return buffer;
       } catch (error) {
         lastError = error;
         if (attempt < MAX_FETCH_RETRIES - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+          await new Promise((resolve) => setTimeout(resolve, 750 * (attempt + 1)));
         }
+      } finally {
+        window.clearTimeout(timeoutId);
       }
     }
 
@@ -83,12 +100,49 @@ export function clearModelCache(path?: string) {
   if (!path) {
     loadedBuffers.clear();
     inFlightBuffers.clear();
+    loadedScenes.clear();
     return;
   }
 
   const absoluteUrl = resolveModelUrl(path);
   loadedBuffers.delete(absoluteUrl);
   inFlightBuffers.delete(absoluteUrl);
+  loadedScenes.delete(absoluteUrl);
+}
+
+function parseGltfScene(path: string, buffer: ArrayBuffer): Promise<Object3D> {
+  return new Promise((resolve, reject) => {
+    const loader = new GLTFLoader();
+    configureProductGltfLoader(loader);
+    loader.parse(
+      buffer,
+      resolveModelUrl(path),
+      (gltf) => resolve(gltf.scene),
+      (error) => reject(error)
+    );
+  });
+}
+
+/** Fetch + parse a GLB and cache both the buffer and parsed scene. */
+export function loadGltfScene(path: string): Promise<Object3D> {
+  const absoluteUrl = resolveModelUrl(path);
+  const cachedScene = loadedScenes.get(absoluteUrl);
+  if (cachedScene) return cachedScene;
+
+  const task = fetchModelBuffer(path)
+    .then((buffer) => parseGltfScene(path, buffer))
+    .catch((error) => {
+      loadedScenes.delete(absoluteUrl);
+      throw error;
+    });
+
+  loadedScenes.set(absoluteUrl, task);
+  return task;
+}
+
+/** Hero-critical preload used before mounting the Three.js canvas. */
+export function warmModel(path: string): Promise<Object3D> {
+  return loadGltfScene(path);
 }
 
 function blobToDataURL(blob: Blob): Promise<string> {
@@ -215,12 +269,3 @@ export const gltfLoaderOptions = {
   useMeshopt: false as const,
   extendLoader: configureProductGltfLoader,
 };
-
-export function preloadGltfModel(path: string) {
-  useGLTF.preload(
-    path,
-    gltfLoaderOptions.useDraco,
-    gltfLoaderOptions.useMeshopt,
-    gltfLoaderOptions.extendLoader
-  );
-}

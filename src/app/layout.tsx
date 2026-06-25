@@ -31,6 +31,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable}>
+      <head>
+        <link
+          rel="preload"
+          href="/models/arora.glb"
+          as="fetch"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="min-h-screen bg-white text-[#1a1a1a]">
         <SmoothScroll>
           <SiteLoaderProvider>{children}</SiteLoaderProvider>

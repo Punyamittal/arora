@@ -2,6 +2,8 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { warmModel } from "@/lib/gltfLoader";
+import { CRITICAL_MODEL_PATHS } from "@/lib/modelPaths";
 import { SiteLoader } from "./SiteLoader";
 
 /** Never block the splash longer than this — page renders underneath immediately. */
@@ -15,6 +17,10 @@ export function SiteLoaderProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [hideOverlay, setHideOverlay] = useState(false);
   const [progress, setProgress] = useState(8);
+
+  useEffect(() => {
+    void Promise.allSettled(CRITICAL_MODEL_PATHS.map((path) => warmModel(path)));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

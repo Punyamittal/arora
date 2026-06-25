@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
-import { clearModelCache, prefetchModel } from "@/lib/gltfLoader";
+import { clearModelCache, warmModel } from "@/lib/gltfLoader";
 import { MODEL_PATHS } from "@/lib/modelPaths";
 import type { ProductModel3DProps } from "./AroraCanModel";
 import { ModelErrorBoundary } from "./ModelErrorBoundary";
@@ -45,7 +45,7 @@ export function ProductModel3D({
     let cancelled = false;
     setStatus("loading");
 
-    prefetchModel(resolvedPath)
+    warmModel(resolvedPath)
       .then(() => {
         if (!cancelled) setStatus("ready");
       })

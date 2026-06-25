@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Center, useGLTF } from "@react-three/drei";
+import { Center } from "@react-three/drei";
 import {
   MathUtils,
   MeshStandardMaterial,
@@ -14,7 +14,7 @@ import {
   type Texture,
 } from "three";
 import { cn } from "@/lib/utils";
-import { gltfLoaderOptions } from "@/lib/gltfLoader";
+import { loadGltfScene } from "@/lib/gltfLoader";
 import { MODEL_PATHS } from "@/lib/modelPaths";
 
 const DEFAULT_MODEL_PATH = MODEL_PATHS.arora;
@@ -151,6 +151,29 @@ interface ModelProps {
   followCursor?: boolean;
 }
 
+function useGltfScene(modelPath: string) {
+  const [scene, setScene] = useState<Object3D | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setScene(null);
+
+    loadGltfScene(modelPath)
+      .then((loadedScene) => {
+        if (!cancelled) setScene(loadedScene);
+      })
+      .catch((error) => {
+        console.warn(`Failed to load ${modelPath}:`, error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [modelPath]);
+
+  return scene;
+}
+
 function AroraModel({
   modelPath,
   scale = 2.2,
@@ -166,13 +189,11 @@ function AroraModel({
   const groupRef = useRef<Group>(null);
   const autoRotY = useRef(0);
   const elapsed = useRef(0);
-  const { scene } = useGLTF(
-    modelPath,
-    gltfLoaderOptions.useDraco,
-    gltfLoaderOptions.useMeshopt,
-    gltfLoaderOptions.extendLoader
+  const sourceScene = useGltfScene(modelPath);
+  const model = useMemo(
+    () => (sourceScene ? cloneSceneWithMaterials(sourceScene) : null),
+    [sourceScene]
   );
-  const model = useMemo(() => cloneSceneWithMaterials(scene), [scene]);
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -210,6 +231,8 @@ function AroraModel({
     group.position.x = MathUtils.lerp(group.position.x, targetPosX, lerpFactor);
     group.position.y = MathUtils.lerp(group.position.y, targetPosY, lerpFactor);
   });
+
+  if (!model) return null;
 
   return (
     <group ref={groupRef} position={position}>
